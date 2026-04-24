@@ -11,13 +11,8 @@ const SECRET = process.env.JWT_SECRET || 'school_monitor_secret';
 const APP_URL = process.env.ALLOWED_ORIGIN || 'http://localhost:3000';
 const resetTokens = new Map();
 
-// Access codes per school — Kendrapramuk sets these
-const ACCESS_CODES = {
-    '1': 'PUNE2025', '2': 'NASHIK2025', '3': 'NAGPUR2025',
-    '4': 'AURANGABAD2025', '5': 'SOLAPUR2025', '6': 'KOLHAPUR2025',
-    '7': 'AMRAVATI2025', '8': 'LATUR2025', '9': 'SATARA2025',
-    '10': 'SANGLI2025', '11': 'JALGAON2025', '12': 'AKOLA2025',
-};
+// Access codes per school — imported from schools route
+const { ACCESS_CODES } = require('./schools');
 
 const makeToken = (user) => {
     const payload = { id: user._id, role: user.role, name: user.name };
