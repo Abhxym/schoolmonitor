@@ -9,25 +9,21 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || 'http://localhost:3000';
 
-app.use(cors({
+// CORS — must be before everything else
+const corsOptions = {
     origin: (origin, callback) => {
         if (!origin) return callback(null, true);
-        const allowed = [
-            ALLOWED_ORIGIN,
-            'http://localhost:3000',
-        ];
-        if (allowed.includes(origin) || origin.endsWith('.vercel.app')) {
+        if (origin.endsWith('.vercel.app') || origin === ALLOWED_ORIGIN || origin === 'http://localhost:3000')
             return callback(null, true);
-        }
         callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+};
 
-// Handle preflight for all routes
-app.options('*', cors());
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // preflight
 app.use(express.json());
 
 app.use('/api/auth/login', rateLimit({
