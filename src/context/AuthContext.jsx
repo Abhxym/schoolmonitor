@@ -2,7 +2,8 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { login as loginService, register as registerService, logout as logoutService, getStoredUser, getMe } from '../services/auth.service';
+import { login as loginService, logout as logoutService, getStoredUser, getMe } from '../services/auth.service';
+import api from '../services/axios';
 import toast from 'react-hot-toast';
 
 const AuthContext = createContext(null);
@@ -28,7 +29,6 @@ export function AuthProvider({ children }) {
         if (!silent) router.push('/');
     }, [router]);
 
-    // Handle NextAuth Google session — store ZP token from session
     useEffect(() => {
         if (status === 'loading') return;
         if (session?.zpToken && session?.zpUser) {
@@ -39,7 +39,6 @@ export function AuthProvider({ children }) {
             setLoading(false);
             return;
         }
-        // Fall back to stored credentials login
         const stored = getStoredUser();
         if (stored && !isTokenExpired()) {
             setUser(stored);
@@ -53,7 +52,6 @@ export function AuthProvider({ children }) {
         setLoading(false);
     }, [session, status, logout]);
 
-    // Check expiry every 60s
     useEffect(() => {
         const interval = setInterval(() => {
             if (getStoredUser() && isTokenExpired()) {
@@ -74,12 +72,15 @@ export function AuthProvider({ children }) {
     };
 
     const register = async (name, email, password, schoolId, accessCode) => {
-        await registerService(name, email, password, schoolId, accessCode);
-        toast.success('Account created successfully! Please log in.');
-        router.push('/login');
+        const { data } = await api.post('/auth/register', { name, email, password, schoolId, accessCode });
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        setUser(data.user);
+        toast.success(`Welcome, ${data.user.name}!`);
+        router.push('/headmaster-dashboard');
+        return data.user;
     };
 
-    // Called after Google sign-in completes — redirect based on role
     const handleGoogleSuccess = useCallback((zpUser) => {
         if (!zpUser) return;
         toast.success(`Welcome, ${zpUser.name}!`);
@@ -87,7 +88,6 @@ export function AuthProvider({ children }) {
         else router.push('/headmaster-dashboard');
     }, [router]);
 
-    // Watch for Google session arriving and redirect (only once)
     const googleRedirected = useRef(false);
     useEffect(() => {
         if (session?.zpUser && user?.id === session.zpUser.id && !googleRedirected.current) {
