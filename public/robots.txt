@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Allow: /schools
+Allow: /events
+Allow: /gallery
+Allow: /contact
+Allow: /attendance
+
+Disallow: /admin-dashboard
+Disallow: /headmaster-dashboard
+Disallow: /api/
+
+Sitemap: https://schoolmonitor.zp.edu/sitemap.xml

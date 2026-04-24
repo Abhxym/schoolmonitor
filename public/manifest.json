@@ -1,0 +1,12 @@
+{
+  "name": "SCMS — Chhatrapati Sambhajinagar, Maharashtra",
+  "short_name": "SCMS",
+  "description": "Cluster School Monitoring System for Chhatrapati Sambhajinagar, Maharashtra.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fcfaf0",
+  "theme_color": "#002147",
+  "icons": [
+    { "src": "/vite.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

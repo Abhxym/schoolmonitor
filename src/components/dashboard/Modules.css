@@ -1,0 +1,91 @@
+.modules {
+    background-color: var(--card-bg);
+}
+
+.section-header {
+    margin-bottom: 4rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.section-header h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.section-header p {
+    color: #718096;
+    font-size: 1.1rem;
+}
+
+.modules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.module-card {
+    background-color: var(--bg-color);
+    border: 1px solid rgba(0, 33, 71, 0.05);
+    border-radius: 12px;
+    padding: 2rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.module-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background-color: var(--accent-gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+}
+
+.module-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px var(--shadow-color);
+    border-color: transparent;
+}
+
+.module-card:hover::before {
+    transform: scaleX(1);
+}
+
+.module-icon {
+    background-color: var(--accent-navy);
+    color: var(--accent-gold);
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.module-card:hover .module-icon {
+    background-color: var(--accent-gold);
+    color: var(--accent-navy);
+}
+
+.module-title {
+    font-size: 1.25rem;
+    font-family: var(--font-sans);
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+}
+
+.module-desc {
+    color: #4a5568;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}

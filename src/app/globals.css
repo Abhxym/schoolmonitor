@@ -1,0 +1,200 @@
+@import '../components/ui/Card.css';
+@import '../components/ui/Badge.css';
+@import '../components/ui/DataTable.css';
+@import '../components/ui/Modal.css';
+@import '../components/ui/FileUpload.css';
+@import '../components/hero/Hero.css';
+@import '../components/layout/Topbar.css';
+@import '../components/layout/Footer.css';
+@import '../components/dashboard/Modules.css';
+
+:root {
+    --bg-color: #fcfaf0;
+    --text-dark: #0f1626;
+    --accent-navy: #002147;
+    --accent-gold: #d4af37;
+    --accent-gold-light: #f5d76e;
+    --card-bg: #ffffff;
+    --shadow-color: rgba(0, 33, 71, 0.08);
+    --font-sans: 'Inter', sans-serif;
+    --font-serif: 'Playfair Display', serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-sans);
+    background-color: var(--bg-color);
+    color: var(--text-dark);
+    line-height: 1.6;
+    overflow-x: hidden;
+    width: 100%;
+    top: 0px !important;
+    position: static !important;
+}
+
+html {
+    overflow-x: hidden;
+    width: 100%;
+    background-color: var(--accent-navy);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
+    color: var(--accent-navy);
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.app-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Utilities */
+.text-gold { color: var(--accent-gold); }
+
+.bg-navy {
+    background-color: var(--accent-navy);
+    color: #fff;
+}
+.bg-navy h1, .bg-navy h2, .bg-navy h3 { color: #fff; }
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.8rem 2rem;
+    border-radius: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+}
+
+.btn-primary {
+    background-color: var(--accent-gold);
+    color: var(--accent-navy);
+}
+.btn-primary:hover {
+    background-color: var(--accent-gold-light);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-outline {
+    background-color: transparent;
+    border: 2px solid var(--accent-gold);
+    color: var(--accent-gold);
+}
+.btn-outline:hover {
+    background-color: var(--accent-gold);
+    color: var(--accent-navy);
+}
+.btn-outline:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.section-padding { padding: 6rem 0; }
+.text-center { text-align: center; }
+
+/* Logo flex layout — used in Sidebar and Topbar */
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+}
+
+/* Spinner — used with Loader2 icon */
+.spinner {
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Form input base */
+.form-input {
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    background-color: white;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-input:focus {
+    outline: none;
+    border-color: var(--accent-navy) !important;
+    box-shadow: 0 0 0 3px rgba(0, 33, 71, 0.08);
+}
+
+/* --- Google Translate UI Overrides --- */
+.goog-te-banner-frame.skiptranslate,
+.goog-te-banner-frame,
+iframe.goog-te-banner-frame,
+iframe[id=":1.container"],
+.skiptranslate>iframe.goog-te-banner-frame,
+div.VIpgJd-ZVi9od-aZ2wEe-wOHMyf,
+div.VIpgJd-ZVi9od-ORHb-OEVmcd {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+.goog-text-highlight {
+    background-color: transparent !important;
+    box-shadow: none !important;
+}
+
+#goog-gt-tt,
+.goog-te-balloon-frame,
+div#goog-gt-tt {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
+.goog-logo-link { display: none !important; }
+
+.goog-te-gadget {
+    color: transparent !important;
+    font-size: 0px !important;
+}
+
+.goog-te-gadget .goog-te-combo {
+    color: var(--accent-navy) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    font-family: var(--font-sans) !important;
+    padding: 4px 8px !important;
+    border-radius: 6px !important;
+    border: 1px solid rgba(0, 33, 71, 0.2) !important;
+    background-color: white !important;
+    outline: none !important;
+    cursor: pointer !important;
+    margin: 0 !important;
+}
