@@ -84,7 +84,8 @@ export default function RegisterPage() {
         try {
             await register(formData.name, formData.email, formData.password, formData.schoolId, formData.accessCode.trim().toUpperCase());
         } catch (err) {
-            toast.error(err.response?.data?.message || 'Registration failed.');
+            const msg = err?.response?.data?.message || err?.message || 'Registration failed.';
+            toast.error(msg);
         } finally {
             setIsLoading(false);
         }

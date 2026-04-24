@@ -79,7 +79,11 @@ export function AuthProvider({ children }) {
             body: JSON.stringify({ name, email, password, schoolId, accessCode }),
         });
         const data = await res.json();
-        if (!res.ok) throw { response: { data } };
+        if (!res.ok) {
+            const error = new Error(data.message || 'Registration failed.');
+            error.response = { data };
+            throw error;
+        }
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
         setUser(data.user);
