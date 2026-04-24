@@ -11,8 +11,12 @@ const SECRET = process.env.JWT_SECRET || 'school_monitor_secret';
 const APP_URL = process.env.ALLOWED_ORIGIN || 'http://localhost:3000';
 const resetTokens = new Map();
 
-// Access codes per school — imported from schools route
-const { ACCESS_CODES } = require('./schools');
+const ACCESS_CODES = {
+    1: 'PUNE2025',       2: 'NASHIK2025',    3: 'NAGPUR2025',
+    4: 'AURANGABAD2025', 5: 'SOLAPUR2025',   6: 'KOLHAPUR2025',
+    7: 'AMRAVATI2025',   8: 'LATUR2025',     9: 'SATARA2025',
+    10: 'SANGLI2025',    11: 'JALGAON2025',  12: 'AKOLA2025',
+};
 
 const makeToken = (user) => {
     const payload = { id: user._id, role: user.role, name: user.name };
@@ -25,7 +29,7 @@ const safeUser = (user) => ({
     role: user.role, schoolId: user.schoolId ?? null, avatar: user.avatar ?? null,
 });
 
-// ── Register ─────────────────────────────────────────────────────────────────
+// ── Register ──────────────────────────────────────────────────────────────────
 router.post('/register', async (req, res) => {
     try {
         const { name, email, password, schoolId, accessCode } = req.body;
@@ -33,22 +37,29 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ message: 'All fields are required' });
         if (password.length < 6)
             return res.status(400).json({ message: 'Password must be at least 6 characters' });
-        const expected = ACCESS_CODES[String(schoolId)];
-        if (!expected || accessCode.toUpperCase() !== expected)
-            return res.status(400).json({ message: 'Invalid access code for this school' });
+
+        const sid = parseInt(schoolId);
+        const expected = ACCESS_CODES[sid];
+        if (!expected || accessCode.trim().toUpperCase() !== expected)
+            return res.status(400).json({ message: 'Invalid access code for this school. Contact your Kendrapramuk.' });
+
         const existing = await User.findOne({ email: email.toLowerCase() });
         if (existing)
             return res.status(409).json({ message: 'An account with this email already exists' });
+
         const user = await User.create({
-            name, email: email.toLowerCase(),
+            name,
+            email: email.toLowerCase(),
             password: bcrypt.hashSync(password, 8),
             role: 'mukhyadhyapak',
-            schoolId: parseInt(schoolId),
+            schoolId: sid,
         });
+
         res.status(201).json({ token: makeToken(user), user: safeUser(user) });
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
+// ── Login ─────────────────────────────────────────────────────────────────────
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -59,39 +70,7 @@ router.post('/login', async (req, res) => {
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
-router.post('/register', async (req, res) => {
-    try {
-        const { name, email, password, schoolId, accessCode } = req.body;
-        if (!name || !email || !password)
-            return res.status(400).json({ message: 'Name, email and password are required' });
-        if (!schoolId)
-            return res.status(400).json({ message: 'Please select a school' });
-        if (!accessCode)
-            return res.status(400).json({ message: 'School access code is required' });
-        if (password.length < 6)
-            return res.status(400).json({ message: 'Password must be at least 6 characters' });
-        // Verify school access code
-        const School = require('../models/School');
-        const school = await School.findOne({ id: parseInt(schoolId) });
-        if (!school)
-            return res.status(404).json({ message: 'School not found' });
-        if (school.accessCode !== accessCode.trim().toUpperCase())
-            return res.status(403).json({ message: 'Invalid access code. Please contact your Kendrapramuk for the correct code.' });
-        const existing = await User.findOne({ email: email.toLowerCase() });
-        if (existing)
-            return res.status(409).json({ message: 'An account with this email already exists' });
-        const user = await User.create({
-            name,
-            email: email.toLowerCase(),
-            password: bcrypt.hashSync(password, 8),
-            role: 'mukhyadhyapak',
-            schoolId: parseInt(schoolId),
-            provisioned: true,
-        });
-        res.status(201).json({ token: makeToken(user), user: safeUser(user) });
-    } catch (err) { res.status(500).json({ message: err.message }); }
-});
-
+// ── Google OAuth ──────────────────────────────────────────────────────────────
 router.post('/google', async (req, res) => {
     try {
         const { email, name, googleId, avatar } = req.body;
@@ -112,6 +91,7 @@ router.post('/google', async (req, res) => {
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
+// ── Forgot Password ───────────────────────────────────────────────────────────
 router.post('/forgot-password', async (req, res) => {
     try {
         const { email } = req.body;
@@ -128,6 +108,7 @@ router.post('/forgot-password', async (req, res) => {
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
+// ── Reset Password ────────────────────────────────────────────────────────────
 router.post('/reset-password', async (req, res) => {
     try {
         const { token, password } = req.body;
@@ -145,6 +126,7 @@ router.post('/reset-password', async (req, res) => {
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
+// ── Me ────────────────────────────────────────────────────────────────────────
 router.get('/me', authMiddleware, async (req, res) => {
     try {
         const user = await User.findById(req.user.id);
@@ -154,3 +136,4 @@ router.get('/me', authMiddleware, async (req, res) => {
 });
 
 module.exports = router;
+module.exports.ACCESS_CODES = ACCESS_CODES;

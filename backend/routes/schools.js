@@ -3,14 +3,7 @@ const School = require('../models/School');
 const auth = require('../middleware/auth');
 const rbac = require('../middleware/rbac');
 
-const ACCESS_CODES = {
-    1: 'PUNE2025',        2: 'NASHIK2025',     3: 'NAGPUR2025',
-    4: 'AURANGABAD2025',  5: 'SOLAPUR2025',    6: 'KOLHAPUR2025',
-    7: 'AMRAVATI2025',    8: 'LATUR2025',      9: 'SATARA2025',
-    10: 'SANGLI2025',     11: 'JALGAON2025',   12: 'AKOLA2025',
-};
-
-module.exports.ACCESS_CODES = ACCESS_CODES;
+const ACCESS_CODES = require('./auth').ACCESS_CODES;
 
 // Public — school directory
 router.get('/', async (req, res) => {
