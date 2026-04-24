@@ -72,7 +72,14 @@ export function AuthProvider({ children }) {
     };
 
     const register = async (name, email, password, schoolId, accessCode) => {
-        const { data } = await api.post('/auth/register', { name, email, password, schoolId, accessCode });
+        const backendUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api');
+        const res = await fetch(`${backendUrl}/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, password, schoolId, accessCode }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw { response: { data } };
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
         setUser(data.user);
