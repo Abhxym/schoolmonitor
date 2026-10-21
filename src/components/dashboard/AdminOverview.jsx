@@ -24,12 +24,20 @@ const AdminOverview = () => {
         ]).finally(() => setLoading(false));
     }, []);
 
-    const totalStudents  = attendance.reduce((s, a) => s + a.total, 0);
+    // Enrolment comes from the school records; attendance rows are one per school per day,
+    // so summing their totals would count every student once for every day.
+    const totalStudents  = schools.reduce((s, sc) => s + (sc.students || 0), 0);
+    const studentDays    = attendance.reduce((s, a) => s + a.total, 0);
     const totalPresent   = attendance.reduce((s, a) => s + a.present, 0);
-    const attendanceRate = totalStudents ? ((totalPresent / totalStudents) * 100).toFixed(1) : 0;
+    const attendanceRate = studentDays ? ((totalPresent / studentDays) * 100).toFixed(1) : 0;
     const pendingReports = reports.filter(r => r.status === 'pending').length;
 
-    const chartData = attendance.map(a => ({ name: `S${a.schoolId}`, present: a.present, absent: a.absent }));
+    // One bar pair per school: average daily present/absent over the loaded period
+    const chartData = schools.map(s => {
+        const att = attendance.filter(a => a.schoolId === s.id);
+        const avg = (k) => att.length ? Math.round(att.reduce((sum, a) => sum + a[k], 0) / att.length) : 0;
+        return { name: `S${s.id}`, school: s.name, present: avg('present'), absent: avg('absent') };
+    });
 
     const schoolPerf = schools.map(s => {
         const att = attendance.filter(a => a.schoolId === s.id);
@@ -39,7 +47,7 @@ const AdminOverview = () => {
         return {
             name: s.name.replace('Zilla Parishad School ', ''),
             rate: parseFloat(rate.toFixed(1)),
-            color: rate >= 95 ? '#38a169' : rate >= 90 ? '#d69e2e' : '#e53e3e',
+            color: rate >= 90 ? '#38a169' : rate >= 80 ? '#d69e2e' : '#e53e3e',
         };
     }).sort((a, b) => b.rate - a.rate).slice(0, 4);
 
@@ -102,7 +110,7 @@ const AdminOverview = () => {
             ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: '2rem', marginBottom: '2rem' }}>
                     <Card>
-                        <CardHeader title="Network Attendance Analytics" />
+                        <CardHeader title="Average Daily Attendance by School" />
                         <CardContent>
                             <div style={{ height: '300px' }}>
                                 <ResponsiveContainer width="100%" height="100%">
@@ -110,7 +118,8 @@ const AdminOverview = () => {
                                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                                         <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#718096' }} />
                                         <YAxis axisLine={false} tickLine={false} tick={{ fill: '#718096' }} />
-                                        <Tooltip cursor={{ fill: 'rgba(0,33,71,0.05)' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+                                        <Tooltip cursor={{ fill: 'rgba(0,33,71,0.05)' }} labelFormatter={(_, p) => p?.[0]?.payload?.school}
+                                            contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
                                         <Legend />
                                         <Bar dataKey="present" name="Present" fill="var(--accent-navy)" radius={[4, 4, 0, 0]} />
                                         <Bar dataKey="absent"  name="Absent"  fill="#cbd5e0"            radius={[4, 4, 0, 0]} />

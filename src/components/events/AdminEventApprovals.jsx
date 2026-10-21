@@ -53,11 +53,11 @@ const AdminEventApprovals = () => {
                                     </div>
                                     <p style={{ fontSize: '0.9rem', color: '#718096', lineHeight: 1.5, marginTop: '0.5rem' }}>{req.description}</p>
                                 </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: 'auto', borderTop: '1px solid #edf2f7', paddingTop: '1rem' }}>
-                                    <button className="btn btn-outline" style={{ color: '#e53e3e', borderColor: '#e53e3e', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }} onClick={() => handleAction(req._id || req.id, 'reject')}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '1rem', marginTop: 'auto', borderTop: '1px solid #edf2f7', paddingTop: '1rem' }}>
+                                    <button className="btn btn-outline" style={{ color: '#e53e3e', borderColor: '#e53e3e', padding: '0.75rem 0.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }} onClick={() => handleAction(req._id || req.id, 'reject')}>
                                         <X size={16} /> Reject
                                     </button>
-                                    <button className="btn btn-primary" style={{ backgroundColor: '#38a169', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }} onClick={() => handleAction(req._id || req.id, 'approve')}>
+                                    <button className="btn btn-primary" style={{ backgroundColor: '#38a169', padding: '0.75rem 0.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }} onClick={() => handleAction(req._id || req.id, 'approve')}>
                                         <Check size={16} /> Approve
                                     </button>
                                 </div>
