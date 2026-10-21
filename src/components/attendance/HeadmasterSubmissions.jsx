@@ -45,7 +45,7 @@ const HeadmasterSubmissions = () => {
         } catch { toast.error('Submission failed.'); }
     };
 
-    const handlePhotoUpload = (files) => {
+    const handlePhotoUpload = () => {
         toast('Gallery upload feature coming soon!', { icon: '🚧' });
         handleClose();
     };

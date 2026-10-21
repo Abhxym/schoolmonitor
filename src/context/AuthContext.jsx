@@ -3,7 +3,6 @@ import { createContext, useContext, useState, useEffect, useCallback, useRef } f
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { login as loginService, logout as logoutService, getStoredUser, getMe } from '../services/auth.service';
-import api from '../services/axios';
 import toast from 'react-hot-toast';
 
 const AuthContext = createContext(null);

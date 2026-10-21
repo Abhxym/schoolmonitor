@@ -5,10 +5,8 @@ import Modal from '../ui/Modal';
 import toast from 'react-hot-toast';
 import { PenTool, CheckCircle, Clock } from 'lucide-react';
 import { getReports, submitReport } from '../../services/reports.service';
-import { useAuth } from '../../hooks/useAuth';
 
 const HeadmasterSubmitReports = () => {
-    const { user } = useAuth();
     const [reports, setReports] = useState([]);
     const [activeForm, setActiveForm] = useState(null);
 
