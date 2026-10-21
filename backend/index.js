@@ -6,6 +6,7 @@ const { connect } = require('./mongoose');
 const seed = require('./seed');
 
 const app = express();
+app.set('trust proxy', 1); // Render sits behind a proxy; rate limits need the real client IP
 const PORT = process.env.PORT || 5000;
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || 'http://localhost:3000';
 
@@ -26,11 +27,13 @@ app.use(cors(corsOptions));
 app.options('/{*path}', cors(corsOptions)); // preflight for Express 5
 app.use(express.json());
 
-app.use('/api/auth/login', rateLimit({
+// Stricter limits on endpoints that can be brute-forced or used to send email
+const strictLimit = rateLimit({
     windowMs: 15 * 60 * 1000, max: 10,
-    message: { message: 'Too many login attempts. Try again in 15 minutes.' },
+    message: { message: 'Too many attempts. Try again in 15 minutes.' },
     standardHeaders: true, legacyHeaders: false,
-}));
+});
+app.use(['/api/auth/login', '/api/auth/register', '/api/auth/forgot-password', '/api/contact'], strictLimit);
 app.use('/api', rateLimit({
     windowMs: 60 * 1000, max: 200,
     standardHeaders: true, legacyHeaders: false,
@@ -49,7 +52,7 @@ app.use('/api/users',         require('./routes/users'));
 
 app.get('/api/health', (_, res) => res.json({ status: 'ok' }));
 
-app.use((err, req, res, next) => {
+app.use((err, req, res, _next) => { // 4 args so Express treats it as the error handler
     console.error(err);
     res.status(err.status || 500).json({ message: err.message || 'Internal server error' });
 });

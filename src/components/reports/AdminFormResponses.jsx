@@ -72,10 +72,6 @@ const AdminFormResponses = () => {
     const pendingCount = reports.filter(r => r.status === 'pending').length;
     const flaggedCount = reports.filter(r => r.status === 'flagged').length;
 
-    const statusColor = (s) => {
-        const m = { submitted: '#2b6cb0', reviewed: '#38a169', pending: '#d69e2e', flagged: '#e53e3e' };
-        return m[s] || '#718096';
-    };
 
     return (
         <div>

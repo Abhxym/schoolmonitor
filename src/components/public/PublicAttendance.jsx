@@ -14,8 +14,11 @@ const PublicAttendance = () => {
         api.get('/attendance').then(r => setAttendance(r.data)).catch(() => {}).finally(() => setLoading(false));
     }, []);
 
-    const totalStudents = attendance.reduce((s, a) => s + a.total, 0);
-    const totalPresent = attendance.reduce((s, a) => s + a.present, 0);
+    // "Today" = the most recent date any school has submitted (rows arrive sorted by date)
+    const latestDate = attendance.length ? attendance[attendance.length - 1].date : null;
+    const latest = attendance.filter(a => a.date === latestDate);
+    const totalStudents = latest.reduce((s, a) => s + a.total, 0);
+    const totalPresent = latest.reduce((s, a) => s + a.present, 0);
     const rate = totalStudents ? ((totalPresent / totalStudents) * 100).toFixed(1) : 0;
 
     // Group by date for chart
@@ -53,17 +56,20 @@ const PublicAttendance = () => {
                         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 300px)', gap: '2rem', alignItems: 'start' }}>
                             <Card>
                                 <CardHeader title="District Aggregate Attendance" />
-                                <CardContent style={{ padding: '0 1.5rem 1.5rem', height: '400px' }}>
+                                <CardContent>
+                                    {/* CardContent doesn't forward style, so the chart needs its own sized box */}
+                                    <div style={{ height: '400px' }}>
                                     <ResponsiveContainer width="100%" height="100%">
                                         <LineChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
                                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                                             <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#718096', fontSize: 11 }} dy={10} />
-                                            <YAxis axisLine={false} tickLine={false} tick={{ fill: '#718096', fontSize: 12 }} dx={-10} domain={[80, 100]} />
+                                            <YAxis axisLine={false} tickLine={false} tick={{ fill: '#718096', fontSize: 12 }} dx={-10} domain={[60, 100]} />
                                             <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }} formatter={(v) => [`${v}%`]} />
                                             <Line type="monotone" dataKey="target" stroke="#e2e8f0" strokeWidth={2} strokeDasharray="5 5" name="Target (95%)" dot={false} />
                                             <Line type="monotone" dataKey="rate" stroke="var(--accent-gold)" strokeWidth={3} dot={{ stroke: 'var(--accent-gold)', strokeWidth: 2, r: 4, fill: 'white' }} activeDot={{ r: 6, fill: 'var(--accent-navy)' }} name="Actual Rate" />
                                         </LineChart>
                                     </ResponsiveContainer>
+                                    </div>
                                 </CardContent>
                             </Card>
 
@@ -84,7 +90,7 @@ const PublicAttendance = () => {
                                             <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Total Students</span><strong>{totalStudents.toLocaleString()}</strong></div>
                                             <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Present Today</span><strong style={{ color: '#38a169' }}>{totalPresent.toLocaleString()}</strong></div>
                                             <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Absent Today</span><strong style={{ color: '#e53e3e' }}>{(totalStudents - totalPresent).toLocaleString()}</strong></div>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Schools Reporting</span><strong>{attendance.length}</strong></div>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Schools Reporting</span><strong>{latest.length}</strong></div>
                                         </div>
                                     </CardContent>
                                 </Card>
