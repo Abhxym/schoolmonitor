@@ -34,7 +34,7 @@ before(async () => {
     });
     await new Promise((resolve, reject) => {
         const timer = setTimeout(() => reject(new Error('server did not start in 30s')), 30_000);
-        server.stdout.on('data', d => { if (String(d).includes('Backend running')) { clearTimeout(timer); resolve(); } });
+        server.stdout.on('data', d => { if (String(d).includes('Seed complete')) { clearTimeout(timer); resolve(); } });
         server.on('exit', code => reject(new Error(`server exited with ${code}`)));
     });
     adminToken = (await call('POST', '/auth/login', { email: 'kendrapramuk@zp.edu', password: 'admin123' })).data.token;

@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
-const { connect } = require('./mongoose');
+const { connect, isConnected } = require('./mongoose');
 const seed = require('./seed');
 
 const app = express();
@@ -39,6 +39,15 @@ app.use('/api', rateLimit({
     standardHeaders: true, legacyHeaders: false,
 }));
 
+// Health stays up even without a database, so Render keeps the service reachable
+// and the response says what is wrong instead of the request hanging.
+let dbError = null;
+app.get('/api/health', (_, res) => res.json({ status: 'ok', db: isConnected() ? 'connected' : 'disconnected', dbError }));
+app.use('/api', (req, res, next) => {
+    if (isConnected()) return next();
+    res.status(503).json({ message: 'Database unavailable. Try again in a minute.' });
+});
+
 app.use('/api/auth',          require('./routes/auth'));
 app.use('/api/attendance',    require('./routes/attendance'));
 app.use('/api/events',        require('./routes/events'));
@@ -50,14 +59,25 @@ app.use('/api/forms',         require('./routes/forms'));
 app.use('/api/contact',       require('./routes/contact'));
 app.use('/api/users',         require('./routes/users'));
 
-app.get('/api/health', (_, res) => res.json({ status: 'ok' }));
-
 app.use((err, req, res, _next) => { // 4 args so Express treats it as the error handler
     console.error(err);
     res.status(err.status || 500).json({ message: err.message || 'Internal server error' });
 });
 
-connect()
-    .then(() => seed())
-    .then(() => app.listen(PORT, () => console.log(`Backend running on http://localhost:${PORT}`)))
-    .catch(err => { console.error('Startup error:', err.message); process.exit(1); });
+// Listen first, then keep retrying the database. Exiting on a DB error makes Render
+// restart-loop the service, and every request hangs with no explanation.
+app.listen(PORT, () => console.log(`Backend running on http://localhost:${PORT}`));
+
+async function connectWithRetry(attempt = 1) {
+    try {
+        await connect();
+        await seed();
+        dbError = null;
+    } catch (err) {
+        dbError = err.message;
+        const wait = Math.min(60, 5 * attempt);
+        console.error(`MongoDB connection failed (attempt ${attempt}): ${err.message}. Retrying in ${wait}s`);
+        setTimeout(() => connectWithRetry(attempt + 1), wait * 1000);
+    }
+}
+connectWithRetry();

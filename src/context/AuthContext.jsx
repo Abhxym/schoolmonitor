@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { login as loginService, logout as logoutService, getStoredUser, getMe } from '../services/auth.service';
 import toast from 'react-hot-toast';
+import { API_URL } from '../utils/constants';
 
 const AuthContext = createContext(null);
 
@@ -71,8 +72,7 @@ export function AuthProvider({ children }) {
     };
 
     const register = async (name, email, password, schoolId, accessCode) => {
-        const backendUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api');
-        const res = await fetch(`${backendUrl}/auth/register`, {
+        const res = await fetch(`${API_URL}/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, email, password, schoolId, accessCode }),

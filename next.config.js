@@ -13,7 +13,7 @@ const nextConfig = {
     },
     async rewrites() {
         const backendBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api')
-            .replace(/\/api$/, '');
+            .trim().replace(/\/+$/, '').replace(/\/api$/, '');
         return [
             {
                 // Proxy /api/* to backend EXCEPT /api/auth/* which NextAuth handles internally
