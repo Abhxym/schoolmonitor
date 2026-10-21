@@ -33,7 +33,11 @@ router.delete('/:id', auth, rbac('kendrapramuk'), async (req, res) => {
         const doc = await GRDocument.findByIdAndDelete(req.params.id);
         if (!doc) return res.status(404).json({ message: 'Document not found' });
         if (doc.publicId) {
-            cloudinary.uploader.destroy(doc.publicId, { resource_type: 'raw' }).catch(() => {});
+            // Uploads use resource_type 'auto', so Cloudinary files PDFs and images as 'image'
+            // and Word/Excel files as 'raw'. destroy() needs the matching type.
+            const isImageLike = /^image\/|\/pdf$/.test(doc.fileType || '');
+            cloudinary.uploader.destroy(doc.publicId, { resource_type: isImageLike ? 'image' : 'raw' })
+                .catch(err => console.error('Cloudinary delete failed:', err.message));
         }
         res.json({ message: 'Deleted' });
     } catch (err) { res.status(500).json({ message: err.message }); }

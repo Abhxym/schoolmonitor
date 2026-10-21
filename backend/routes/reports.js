@@ -39,7 +39,10 @@ router.post('/', auth, rbac('mukhyadhyapak'), validate(['title']), async (req, r
 
 router.patch('/:id/status', auth, rbac('kendrapramuk'), async (req, res) => {
     try {
-        const report = await Report.findByIdAndUpdate(req.params.id, { status: req.body.status }, { new: true });
+        const { status } = req.body;
+        if (!['reviewed', 'flagged', 'pending', 'submitted'].includes(status))
+            return res.status(400).json({ message: 'Status must be one of: reviewed, flagged, pending, submitted' });
+        const report = await Report.findByIdAndUpdate(req.params.id, { status }, { new: true });
         if (!report) return res.status(404).json({ message: 'Report not found' });
         res.json(report);
     } catch (err) { res.status(500).json({ message: err.message }); }

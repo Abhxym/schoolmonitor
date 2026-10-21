@@ -10,19 +10,15 @@ const handler = NextAuth({
     ],
     secret: process.env.NEXTAUTH_SECRET,
     callbacks: {
-        async jwt({ token, account, profile }) {
-            // On first sign-in, exchange Google token for ZP JWT
-            if (account?.provider === 'google') {
+        async jwt({ token, account }) {
+            // On first sign-in, exchange the Google ID token for a ZP JWT.
+            // The backend verifies the ID token with Google before trusting the email in it.
+            if (account?.provider === 'google' && account.id_token) {
                 try {
                     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/google`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            email: token.email,
-                            name: token.name,
-                            googleId: token.sub,
-                            avatar: token.picture,
-                        }),
+                        body: JSON.stringify({ idToken: account.id_token }),
                     });
                     if (res.ok) {
                         const data = await res.json();

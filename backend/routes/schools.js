@@ -3,33 +3,28 @@ const School = require('../models/School');
 const auth = require('../middleware/auth');
 const rbac = require('../middleware/rbac');
 
-const ACCESS_CODES = require('./auth').ACCESS_CODES;
+// Access codes gate registration, so they never leave the server on public routes.
+const PUBLIC_FIELDS = '-accessCode -__v';
 
 // Public — school directory
 router.get('/', async (req, res) => {
-    try { res.json(await School.find().sort({ id: 1 }).lean()); }
+    try { res.json(await School.find().select(PUBLIC_FIELDS).sort({ id: 1 }).lean()); }
     catch (err) { res.status(500).json({ message: err.message }); }
 });
 
-// Kendrapramuk only — returns schools with access codes for dashboard
+// Kendrapramuk only — schools with their registration access codes
 router.get('/admin/access-codes', auth, rbac('kendrapramuk'), async (req, res) => {
     try {
         const schools = await School.find().sort({ id: 1 }).lean();
-        res.json(schools.map(s => ({
-            id: s.id,
-            name: s.name.replace('Zilla Parishad School ', 'ZP School '),
-            accessCode: ACCESS_CODES[s.id] || 'N/A',
-        })));
+        res.json(schools.map(s => ({ id: s.id, name: s.name, accessCode: s.accessCode })));
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
-// Single school
-router.get('/:id', auth, rbac('kendrapramuk', 'mukhyadhyapak'), async (req, res) => {
+// Public — single school (the public school detail page uses this)
+router.get('/:id', async (req, res) => {
     try {
-        const school = await School.findOne({ id: parseInt(req.params.id) }).lean();
+        const school = await School.findOne({ id: parseInt(req.params.id) }).select(PUBLIC_FIELDS).lean();
         if (!school) return res.status(404).json({ message: 'School not found' });
-        if (req.user.role === 'mukhyadhyapak' && school.id !== req.user.schoolId)
-            return res.status(403).json({ message: 'Access denied to this school' });
         res.json(school);
     } catch (err) { res.status(500).json({ message: err.message }); }
 });

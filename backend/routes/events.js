@@ -8,11 +8,15 @@ const validate = require('../middleware/validate');
 const { send } = require('../mailer');
 const { eventSubmittedTemplate, eventStatusTemplate } = require('../notificationTemplates');
 
-router.get('/', async (req, res) => {
+// Public visitors only see approved events; pending/rejected ones are visible to
+// the Kendrapramuk and to the school that submitted them.
+router.get('/', auth.optional, async (req, res) => {
     try {
         const { status } = req.query;
         const filter = status ? { status } : {};
-        res.json(await Event.find(filter).lean());
+        if (!req.user) filter.status = 'approved';
+        else if (req.user.role === 'mukhyadhyapak' && filter.status !== 'approved') filter.schoolId = req.user.schoolId;
+        res.json(await Event.find(filter).sort({ date: -1 }).lean());
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
